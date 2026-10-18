@@ -26,4 +26,4 @@ It matches the user's language (Hebrew or English) and uses bold for UI elements
 
 ## Status
 
-Homework project. The system prompt in the spec is still a draft: the escalation summary format, safety guardrails and example conversations are not defined yet.
+Homework project. The system prompt is complete (role, scope, troubleshooting flow, communication style, safety rules, escalation criteria and summary template, example conversations) and ready to paste into the Claude Console. It has not been deployed or tested yet.
