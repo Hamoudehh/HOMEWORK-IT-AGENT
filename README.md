@@ -24,6 +24,8 @@ It matches the user's language (Hebrew or English) and uses bold for UI elements
 
 - [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md): the full spec, including the system prompt to paste into the **System** field in the Claude Console.
 
+- [`Architecture.md`](Architecture.md): system design with data-flow diagrams (trigger, agent, database, dashboard, outputs).
+
 ## Status
 
 Homework project. The system prompt is complete (role, scope, troubleshooting flow, communication style, safety rules, escalation criteria and summary template, example conversations) and ready to paste into the Claude Console. It has not been deployed or tested yet.
