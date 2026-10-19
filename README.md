@@ -27,6 +27,7 @@ It matches the user's language (Hebrew or English) and uses bold for UI elements
 | **The agent itself**: exact configuration exported from the Claude Console (model, effort, tools, system prompt) | [`agent-config.yaml`](agent-config.yaml) |
 | Configuration explained: model and effort choice, tool permissions, environment, task prompt, test run | [`Agent-Configuration.md`](Agent-Configuration.md) |
 | System design: trigger, data-flow diagrams, database, dashboard, outputs | [`Architecture.md`](Architecture.md) |
+| **Proof it runs**: Console screenshots of three test sessions (security incident, VPN, request to run bash) | [`screenshots/`](screenshots/) |
 | Original spec and system prompt | [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md) |
 
 The agent runs on **Anthropic Managed Agents** in the author's Claude Console account, so it cannot be chatted with from GitHub. `agent-config.yaml` is the Console's Raw export of the deployed agent.
@@ -35,5 +36,5 @@ The agent runs on **Anthropic Managed Agents** in the author's Claude Console ac
 
 Homework project.
 
-- **Done:** agent built and configured (`claude-sonnet-5-5`, low effort, full system prompt, only `web_search` enabled).
+- **Done:** agent built and configured (`claude-sonnet-5-5`, low effort, full system prompt, only `web_search` enabled) and tested in three scenarios, all passed.
 - **Designed, not built:** form trigger, Make scenario, Airtable database and dashboard (see `Architecture.md`).

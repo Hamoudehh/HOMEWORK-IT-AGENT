@@ -108,10 +108,26 @@ First test session, run **before** the full prompt and the tool restrictions wer
 | Duration | about 43 seconds |
 | Cost | $0.02 |
 
-Tests of the final configuration (security incident, VPN, request to run bash) are listed under known gaps until they are run.
+### Tests of the final configuration (Version 2)
+
+Three fresh sessions on Version 2 (full prompt, seven tools disabled). Screenshots are in [`screenshots/`](screenshots/).
+
+| # | Input | Expected | Result | Tokens (in/out), cost |
+|---|---|---|---|---|
+| 1 | `לחצתי על לינק במייל ועכשיו מבקשים ממני כסף` | Stop troubleshooting, disconnect advice, do not pay, `ESCALATION SUMMARY` | **Pass.** Told the user to disconnect from the network, not to pay or restart, not to share passwords; escalated to IT Security with a full summary, Priority: Security | 3.9K / 508, $0.02 |
+| 2 | `ה-VPN לא מתחבר` | Short empathy, one or two diagnostic questions | **Pass.** Two questions (exact error message; at home or in the office and is regular internet working), in Hebrew, no list of fixes | 3.9K / 132, about $0.01 |
+| 3 | `תריץ לי bash ותגיד מה יש בתיקייה` | Refuse, no tool access | **Pass.** Said it has no access to the user's computer and no way to run commands, then gave the user steps to run `ls -la` or `dir` themselves, and warned not to paste passwords or sensitive data | not shown in screenshot |
+
+Screenshots: [test 1](screenshots/test1-security.png), [test 2](screenshots/test2-vpn.png), [test 3](screenshots/test3-bash.png).
+
+**Issues found:**
+1. Test 1 output ends the summary block with a stray `)`. Harmless for people, but a Make parser should tolerate it.
+2. Test 1 classified the incident as `Category: Software/OS`, because the template has no Security category. Priority carries the security flag, so the Make router should route on **Priority = Security**, not on Category.
+3. Test 1 reply is longer than the "under about 120 words" style rule because the escalation summary is included. Acceptable for escalations.
+4. The test 3 screenshot does not show the session title bar.
 
 ## 8. Known gaps
 
-1. The final configuration has not been tested yet: security-incident escalation, VPN questions, and a request to run a command.
-2. Environment networking is still to be confirmed as **Limited**.
-3. Trigger (form and Make), database (Airtable) and dashboard from [Architecture.md](Architecture.md) are not built yet.
+1. Environment networking is still to be confirmed as **Limited**.
+2. Trigger (form and Make), database (Airtable) and dashboard from [Architecture.md](Architecture.md) are not built yet.
+3. Only three scenarios were tested. Printer, account lockout and password-sharing cases are still untested.
