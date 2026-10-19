@@ -126,6 +126,11 @@ tools:
           type: always_allow
         type: web_fetch
         url_sources: null
+      - enabled: false
+        name: web_search
+        permission_policy:
+          type: always_allow
+        type: web_search
     default_config:
       enabled: true
       permission_policy:

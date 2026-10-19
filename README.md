@@ -36,5 +36,5 @@ The agent runs on **Anthropic Managed Agents** in the author's Claude Console ac
 
 Homework project.
 
-- **Done:** agent built and configured (`claude-sonnet-5-5`, low effort, full system prompt, only `web_search` enabled) and tested in four scenarios. Security escalation, VPN questions and refusing to run commands passed; `web_search` fails under Limited networking (see `Agent-Configuration.md`).
+- **Done:** agent built and configured (`claude-sonnet-5-5`, low effort, full system prompt, all built-in tools disabled, Limited networking) and tested in four scenarios. Security escalation, VPN questions and refusing to run commands passed; `web_search` failed under Limited networking, so it was disabled (see `Agent-Configuration.md`).
 - **Designed, not built:** form trigger, Make scenario, Airtable database and dashboard (see `Architecture.md`).
