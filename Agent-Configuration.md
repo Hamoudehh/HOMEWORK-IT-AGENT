@@ -53,10 +53,15 @@ The environment is the container the agent's sessions run in.
 | Name | `deep-researcher-env` |
 | ID | `env_012Grw4P9176Zhtt4uAKta3X` |
 | Hosting | Cloud (cannot be changed after creation), scope: Organization |
-| Networking | Unrestricted when last checked. Target: **Limited** |
+| Networking | **Limited**: outbound traffic is blocked except what is allowed below ([screenshot](screenshots/environment-networking-limited.png)) |
+| Allow package managers | On (default): can reach PyPI, npm and other registries |
+| Allow MCP servers | Off (the agent has no MCP servers) |
+| Allowed hosts | None (0 of 16 used) |
 | Extra packages | None (standard image only) |
 
-A help-desk agent has no reason to reach arbitrary websites, so networking should be **Limited**. The environment name suggests a research use; a dedicated `helpbot-env` would be cleaner.
+A help-desk agent has no reason to reach arbitrary websites, so networking is **Limited**. Package-manager access is not needed either, since the agent installs nothing, and could be switched off. The environment name suggests a research use; a dedicated `helpbot-env` would be cleaner.
+
+Not verified: whether `web_search` still works under Limited networking.
 
 ## 5. System prompt
 
@@ -128,6 +133,6 @@ Screenshots: [test 1](screenshots/test1-security.png), [test 2](screenshots/test
 
 ## 8. Known gaps
 
-1. Environment networking is still to be confirmed as **Limited**.
+1. `web_search` has not been tested under Limited networking.
 2. Trigger (form and Make), database (Airtable) and dashboard from [Architecture.md](Architecture.md) are not built yet.
 3. Only three scenarios were tested. Printer, account lockout and password-sharing cases are still untested.
