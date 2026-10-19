@@ -40,6 +40,22 @@ HelpBot cannot see or control the employee's computer. It only gives instruction
 
 > **Open point:** the built-in toolset is on by default and the agent does not need most of it for a text-only help desk. Tools that are not required (for example shell, file or web tools) should be switched off under **Tool permissions** to reduce risk and cost.
 
+## 3b. Environment
+
+The environment is the container the agent's sessions run in.
+
+| Setting | Value |
+|---|---|
+| Name | `deep-researcher-env` |
+| ID | `env_012Grw4P9176Zhtt4uAKta3X` |
+| Hosting | Cloud (cannot be changed after creation), scope: Organization |
+| Networking | **Unrestricted** (sessions can reach any host on the internet) |
+| Extra packages | None (standard image only) |
+| Metadata | None |
+| Last updated | Oct 17 |
+
+> **Open point:** the name suggests a research use rather than a help desk, and networking is **Unrestricted**. A help-desk agent has no reason to reach arbitrary websites, so a dedicated environment (for example `helpbot-env`) with **Limited** networking would be safer. This is a configuration recommendation, not yet applied.
+
 ## 4. System prompt
 
 ### As currently deployed in the Console (Version 1)
