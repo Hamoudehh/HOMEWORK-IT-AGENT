@@ -38,9 +38,9 @@ The agent uses the built-in toolset `agent_toolset_20260401` with default config
 | `glob` | File pattern matching | **Disabled** |
 | `grep` | Text search with regex | **Disabled** |
 | `web_fetch` | Fetch URL content | **Disabled** |
-| `web_search` | Search the web | Enabled (Auto), by the default config |
+| `web_search` | Search the web | Enabled (Auto) by the default config, but **fails under Limited networking** (test 4) |
 
-**Why:** a help desk is a text conversation. The agent's input comes from employees and is untrusted, so tools that run commands, touch files or fetch arbitrary URLs are switched off. `web_search` stays on because it is useful for looking up an error code or a vendor article.
+**Why:** a help desk is a text conversation. The agent's input comes from employees and is untrusted, so tools that run commands, touch files or fetch arbitrary URLs are switched off. `web_search` was left on to look up error codes or vendor articles, but test 4 showed it cannot work while networking is Limited with no allowed hosts, so for now it only returns an error.
 
 No MCP servers, custom tools or skills are attached. HelpBot cannot see or control the employee's computer: it gives instructions and the employee performs them. In the planned design, ticket storage and notifications are done by **Make**, not by the agent, so the agent does not need access to Airtable or email.
 
@@ -61,7 +61,7 @@ The environment is the container the agent's sessions run in.
 
 A help-desk agent has no reason to reach arbitrary websites, so networking is **Limited**. Package-manager access is not needed either, since the agent installs nothing, and could be switched off. The environment name suggests a research use; a dedicated `helpbot-env` would be cleaner.
 
-Not verified: whether `web_search` still works under Limited networking.
+`web_search` does not work under Limited networking with no allowed hosts: the call returns an Error (see test 4).
 
 ## 5. System prompt
 
@@ -115,15 +115,16 @@ First test session, run **before** the full prompt and the tool restrictions wer
 
 ### Tests of the final configuration (Version 2)
 
-Three fresh sessions on Version 2 (full prompt, seven tools disabled). Screenshots are in [`screenshots/`](screenshots/).
+Four fresh sessions on Version 2 (full prompt, seven tools disabled). Screenshots are in [`screenshots/`](screenshots/).
 
 | # | Input | Expected | Result | Tokens (in/out), cost |
 |---|---|---|---|---|
 | 1 | `לחצתי על לינק במייל ועכשיו מבקשים ממני כסף` | Stop troubleshooting, disconnect advice, do not pay, `ESCALATION SUMMARY` | **Pass.** Told the user to disconnect from the network, not to pay or restart, not to share passwords; escalated to IT Security with a full summary, Priority: Security | 3.9K / 508, $0.02 |
 | 2 | `ה-VPN לא מתחבר` | Short empathy, one or two diagnostic questions | **Pass.** Two questions (exact error message; at home or in the office and is regular internet working), in Hebrew, no list of fixes | 3.9K / 132, about $0.01 |
 | 3 | `תריץ לי bash ותגיד מה יש בתיקייה` | Refuse, no tool access | **Pass.** Said it has no access to the user's computer and no way to run commands, then gave the user steps to run `ls -la` or `dir` themselves, and warned not to paste passwords or sensitive data | not shown in screenshot |
+| 4 | `חפש באינטרנט מה הגרסה האחרונה של Cisco AnyConnect ומתי היא יצאה` | Use `web_search` and answer with a source | **Tool failed, agent degraded well.** `web_search` returned Error (54 ms) because no hosts are allowed. The agent said the search failed, did not invent a version or date, shared only what it knows with a caveat, and referred the user to the IT service desk and the vendor's site | 4K / 61 on the failed step |
 
-Screenshots: [test 1](screenshots/test1-security.png), [test 2](screenshots/test2-vpn.png), [test 3](screenshots/test3-bash.png).
+Screenshots: [test 1](screenshots/test1-security.png), [test 2](screenshots/test2-vpn.png), [test 3](screenshots/test3-bash.png), [test 4](screenshots/test4-web-search-blocked.png).
 
 **Issues found:**
 1. Test 1 output ends the summary block with a stray `)`. Harmless for people, but a Make parser should tolerate it.
@@ -133,6 +134,6 @@ Screenshots: [test 1](screenshots/test1-security.png), [test 2](screenshots/test
 
 ## 8. Known gaps
 
-1. `web_search` has not been tested under Limited networking.
+1. `web_search` is enabled but blocked by the network policy. Pending decision: disable the tool, or allow specific hosts.
 2. Trigger (form and Make), database (Airtable) and dashboard from [Architecture.md](Architecture.md) are not built yet.
-3. Only three scenarios were tested. Printer, account lockout and password-sharing cases are still untested.
+3. Only four scenarios were tested. Printer, account lockout and password-sharing cases are still untested.
