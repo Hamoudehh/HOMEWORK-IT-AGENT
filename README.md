@@ -20,14 +20,20 @@ The agent follows a four-step flow and asks only one or two focused questions at
 
 It matches the user's language (Hebrew or English) and uses bold for UI elements, buttons and shortcuts.
 
-## Files
+## Where to look
 
-- [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md): the full spec, including the system prompt to paste into the **System** field in the Claude Console.
+| What | File |
+|---|---|
+| **The agent itself**: exact configuration exported from the Claude Console (model, effort, tools, system prompt) | [`agent-config.yaml`](agent-config.yaml) |
+| Configuration explained: model and effort choice, tool permissions, environment, task prompt, test run | [`Agent-Configuration.md`](Agent-Configuration.md) |
+| System design: trigger, data-flow diagrams, database, dashboard, outputs | [`Architecture.md`](Architecture.md) |
+| Original spec and system prompt | [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md) |
 
-- [`Architecture.md`](Architecture.md): system design with data-flow diagrams (trigger, agent, database, dashboard, outputs).
-
-- [`Agent-Configuration.md`](Agent-Configuration.md): the deployed agent's configuration (model, effort, tools, system prompt, task prompt).
+The agent runs on **Anthropic Managed Agents** in the author's Claude Console account, so it cannot be chatted with from GitHub. `agent-config.yaml` is the Console's Raw export of the deployed agent.
 
 ## Status
 
-Homework project. The system prompt is complete (role, scope, troubleshooting flow, communication style, safety rules, escalation criteria and summary template, example conversations) and ready to paste into the Claude Console. It has not been deployed or tested yet.
+Homework project.
+
+- **Done:** agent built and configured (`claude-sonnet-5-5`, low effort, full system prompt, only `web_search` enabled).
+- **Designed, not built:** form trigger, Make scenario, Airtable database and dashboard (see `Architecture.md`).

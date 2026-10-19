@@ -1,6 +1,6 @@
 # Agent Configuration: HelpBot AI
 
-The agent is built and running on **Anthropic Managed Agents** (Claude Console). This document records its configuration **as it is deployed**, taken from the Console, and notes where it differs from the target design in [Architecture.md](Architecture.md).
+The agent is built and running on **Anthropic Managed Agents** (Claude Console). This document records its configuration as deployed. The exact configuration exported from the Console (Raw view) is in [`agent-config.yaml`](agent-config.yaml). The design around it is in [Architecture.md](Architecture.md).
 
 ## 1. Summary
 
@@ -10,16 +10,15 @@ The agent is built and running on **Anthropic Managed Agents** (Claude Console).
 | Agent name | תרגול בניית סוכן |
 | Description | IT agent for help desk |
 | Agent ID | `agent_01M1zJ5WFzfJNXaNSi3ajMwL` |
-| Version | 1 (Latest) |
-| **Model** | **`claude-sonnet-5-5`** |
-| **Effort level** | **Low effort** |
-| Environment | `deep-researcher-env` |
-| Built-in tools | `agent_toolset_20260401`, 8 tool permissions, permission mode **Auto** |
+| **Model** | **`claude-sonnet-5-5`** (speed: standard) |
+| **Effort level** | **Low** |
+| System prompt | Full version (role, scope, rules, style, safety, escalation, examples) |
+| Built-in tools | `agent_toolset_20260401`: only `web_search` enabled, seven tools disabled |
 | MCP servers | None |
 | Custom tools | None |
 | Skills | None |
-| Multiagent (Workflows, Subagents, Advisor) | All off |
-| Vaults / Deployment | None |
+| Multiagent (Workflows, Subagents, Advisor) | Off |
+| Environment | `deep-researcher-env` |
 
 ## 2. Model and effort
 
@@ -28,34 +27,24 @@ The agent is built and running on **Anthropic Managed Agents** (Claude Console).
 
 ## 3. Tools
 
-| Tool group | State | Notes |
+The agent uses the built-in toolset `agent_toolset_20260401` with default config `enabled: true`, permission policy `auto`, and seven tools explicitly disabled:
+
+| Tool | Description | State |
 |---|---|---|
-| Built-in tools (`agent_toolset_20260401`) | Enabled, 8 permissions, all set to Auto | Default toolset of Managed Agents, running inside the environment sandbox |
-| MCP servers | None | Not needed yet. Airtable would be added here only if the agent itself should read or write tickets |
-| Custom tools | None | |
-| Skills | None | |
-| Subagents / Workflows / Advisor | Off | A single-agent chat flow does not need them |
+| `bash` | Execute bash commands | **Disabled** |
+| `read` | Read files | **Disabled** |
+| `write` | Write files | **Disabled** |
+| `edit` | String replacement in files | **Disabled** |
+| `glob` | File pattern matching | **Disabled** |
+| `grep` | Text search with regex | **Disabled** |
+| `web_fetch` | Fetch URL content | **Disabled** |
+| `web_search` | Search the web | Enabled (Auto), by the default config |
 
-HelpBot cannot see or control the employee's computer. It only gives instructions, and the employee performs them. In the planned design, ticket storage and notifications are done by **Make**, not by the agent, so the agent does not need tool access to Airtable or email.
+**Why:** a help desk is a text conversation. The agent's input comes from employees and is untrusted, so tools that run commands, touch files or fetch arbitrary URLs are switched off. `web_search` stays on because it is useful for looking up an error code or a vendor article.
 
-### Built-in tool permissions (as deployed)
+No MCP servers, custom tools or skills are attached. HelpBot cannot see or control the employee's computer: it gives instructions and the employee performs them. In the planned design, ticket storage and notifications are done by **Make**, not by the agent, so the agent does not need access to Airtable or email.
 
-Each tool can be set to **Auto**, **Allow**, **Ask** (needs approval) or **Deny**. All eight are on **Auto**.
-
-| Tool | Description | Needed for a help desk? | Recommended |
-|---|---|---|---|
-| `bash` | Execute bash commands | No | Deny |
-| `read` | Read files | No | Deny |
-| `write` | Write files | No | Deny |
-| `edit` | String replacement in files | No | Deny |
-| `glob` | File pattern matching | No | Deny |
-| `grep` | Text search with regex | No | Deny |
-| `web_fetch` | Fetch URL content | No | Deny |
-| `web_search` | Search the web | Useful, to look up an error code or vendor article | Keep (Auto) |
-
-**Why trim them:** the agent's input comes from employees and is untrusted. With `bash` and `web_fetch` on Auto and networking Unrestricted, a malicious or pasted message could try to make the agent run commands or fetch arbitrary URLs. The help-desk job is text-only, so only `web_search` has a clear use. These recommendations are **not yet applied** in the Console.
-
-## 3b. Environment
+## 4. Environment
 
 The environment is the container the agent's sessions run in.
 
@@ -64,58 +53,33 @@ The environment is the container the agent's sessions run in.
 | Name | `deep-researcher-env` |
 | ID | `env_012Grw4P9176Zhtt4uAKta3X` |
 | Hosting | Cloud (cannot be changed after creation), scope: Organization |
-| Networking | **Unrestricted** (sessions can reach any host on the internet) |
+| Networking | Unrestricted when last checked. Target: **Limited** |
 | Extra packages | None (standard image only) |
-| Metadata | None |
-| Last updated | Oct 17 |
 
-> **Open point:** the name suggests a research use rather than a help desk, and networking is **Unrestricted**. A help-desk agent has no reason to reach arbitrary websites, so a dedicated environment (for example `helpbot-env`) with **Limited** networking would be safer. This is a configuration recommendation, not yet applied.
+A help-desk agent has no reason to reach arbitrary websites, so networking should be **Limited**. The environment name suggests a research use; a dedicated `helpbot-env` would be cleaner.
 
-## 4. System prompt
+## 5. System prompt
 
-### As currently deployed in the Console (Version 1)
+The deployed system prompt is the full version from [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md). It is stored verbatim in the `system:` field of [`agent-config.yaml`](agent-config.yaml). Sections:
 
-```text
-# Role & Objective
-You are "HelpBot AI", an expert IT Support and Helpdesk Assistant designed for enterprise employees. Your primary goal is not just to give instant generic answers, but to act like a professional, patient, and methodical IT technician. You guide users through a structured troubleshooting process to diagnose and resolve technical issues efficiently.
+| Section | Purpose |
+|---|---|
+| Role & Objective | Patient, methodical IT technician, not a generic answer machine |
+| Scope of Support | Network/VPN, software and login, printers and peripherals, email and account access |
+| Operational Rules | One or two questions at a time; four-step flow: acknowledge, clarify, safe fixes, escalate |
+| Communication Style | Calm tone, matches the user's language (Hebrew or English), short replies under about 120 words |
+| Safety & Security Rules | Never ask for passwords or MFA codes; no risky actions without warning; no bypassing company security policy; stop and escalate security incidents; never claim to have performed an action |
+| When to Escalate | Unsolved after 2-3 rounds, outage, admin rights needed, data loss or security incident, user asks for a person |
+| Escalation template | `ESCALATION SUMMARY` block (category, priority, impact, device, problem, error, timeline, steps tried, notes) |
+| Example Interactions | VPN (English), printer (Hebrew), phishing incident (English) |
 
-# Scope of Support
-You handle common workplace IT issues, including:
-1. Network & VPN connectivity problems.
-2. Software crashes, installation errors, and authentication/login loops.
-3. Printer and hardware peripherals configuration.
-4. Basic email and account access troubleshooting.
+The `ESCALATION SUMMARY` header is what the Make router in the architecture searches for to detect an escalation.
 
-# Operational Rules & Guidelines
-1. Never dump a massive list of solutions at once.
-Ask ONE or TWO focused diagnostic questions at a time.
-2. Follow a Step-by-Step Troubleshooting Flow:
-   - Step 1: Acknowledge & Validate. Empathize briefly with the user's frustration.
-   - Step 2: Clarify & Isolate. Ask targeted questions to understand exact symptoms.
-   - Step 3: Propose Safe Fixes. Give clear, numbered, non-destructive instructions first.
-   - Step 4: Escalate if Needed. Provide a structured summary for IT Tier 2 if unresolved.
-
-# Communication Style
-- Tone: Professional, calm, reassuring, and clear.
-- Language: Match the user's language (Hebrew if Hebrew, English if English).
-- Formatting: Use bolding for UI elements, buttons, or shortcuts (e.g., Ctrl + Shift + R).
-```
-
-### Target version (not yet deployed)
-
-The full prompt in [`gemini-code-1792353385240.md`](gemini-code-1792353385240.md) adds what the deployed version lacks:
-
-- **Safety rules:** never ask for passwords or MFA codes, no risky actions without warning, no bypassing company security policy.
-- **Escalation criteria** and the `ESCALATION SUMMARY` template. This is what the Make router in the architecture looks for, so **the integration will not work until this version is deployed.**
-- Reply length limit and three example conversations.
-
-To deploy it: Console, Managed Agents, Agents, open the agent, replace the **System prompt**, save (this creates Version 2).
-
-## 5. Task prompt (what starts a session)
+## 6. Task prompt (what starts a session)
 
 In Managed Agents the task is the **first user message** of a session. The system prompt defines how the agent behaves; the task prompt carries the specific problem.
 
-**Today (manual test in the Console):** the message is typed directly. Example from a test session:
+**Manual test in the Console:** the message is typed directly, for example:
 
 ```text
 שומע, אין אינטרנט
@@ -131,7 +95,9 @@ Problem: {message}
 
 Follow-up messages in the same session contain only the employee's new text.
 
-## 6. Test run
+## 7. Test run
+
+First test session, run **before** the full prompt and the tool restrictions were applied:
 
 | Item | Value |
 |---|---|
@@ -142,11 +108,10 @@ Follow-up messages in the same session contain only the employee's new text.
 | Duration | about 43 seconds |
 | Cost | $0.02 |
 
-The reply follows the deployed prompt: it validates briefly, asks exactly two questions and answers in the user's language.
+Tests of the final configuration (security incident, VPN, request to run bash) are listed under known gaps until they are run.
 
-## 7. Known gaps
+## 8. Known gaps
 
-1. Deployed prompt is the short version (no safety rules, no escalation template).
-2. Built-in toolset is enabled with default permissions and not trimmed.
-3. Only one manual test was run; the VPN, printer and security-incident scenarios are still to be tested.
-4. Trigger, database and dashboard from [Architecture.md](Architecture.md) are not built yet.
+1. The final configuration has not been tested yet: security-incident escalation, VPN questions, and a request to run a command.
+2. Environment networking is still to be confirmed as **Limited**.
+3. Trigger (form and Make), database (Airtable) and dashboard from [Architecture.md](Architecture.md) are not built yet.
