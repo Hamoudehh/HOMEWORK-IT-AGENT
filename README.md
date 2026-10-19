@@ -26,6 +26,8 @@ It matches the user's language (Hebrew or English) and uses bold for UI elements
 
 - [`Architecture.md`](Architecture.md): system design with data-flow diagrams (trigger, agent, database, dashboard, outputs).
 
+- [`Agent-Configuration.md`](Agent-Configuration.md): the deployed agent's configuration (model, effort, tools, system prompt, task prompt).
+
 ## Status
 
 Homework project. The system prompt is complete (role, scope, troubleshooting flow, communication style, safety rules, escalation criteria and summary template, example conversations) and ready to paste into the Claude Console. It has not been deployed or tested yet.
