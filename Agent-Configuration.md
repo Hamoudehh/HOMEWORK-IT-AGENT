@@ -30,7 +30,7 @@ The agent is built and running on **Anthropic Managed Agents** (Claude Console).
 
 | Tool group | State | Notes |
 |---|---|---|
-| Built-in tools (`agent_toolset_20260401`) | Enabled, 8 permissions, Auto | Default toolset of Managed Agents, running inside the environment sandbox |
+| Built-in tools (`agent_toolset_20260401`) | Enabled, 8 permissions, all set to Auto | Default toolset of Managed Agents, running inside the environment sandbox |
 | MCP servers | None | Not needed yet. Airtable would be added here only if the agent itself should read or write tickets |
 | Custom tools | None | |
 | Skills | None | |
@@ -38,7 +38,22 @@ The agent is built and running on **Anthropic Managed Agents** (Claude Console).
 
 HelpBot cannot see or control the employee's computer. It only gives instructions, and the employee performs them. In the planned design, ticket storage and notifications are done by **Make**, not by the agent, so the agent does not need tool access to Airtable or email.
 
-> **Open point:** the built-in toolset is on by default and the agent does not need most of it for a text-only help desk. Tools that are not required (for example shell, file or web tools) should be switched off under **Tool permissions** to reduce risk and cost.
+### Built-in tool permissions (as deployed)
+
+Each tool can be set to **Auto**, **Allow**, **Ask** (needs approval) or **Deny**. All eight are on **Auto**.
+
+| Tool | Description | Needed for a help desk? | Recommended |
+|---|---|---|---|
+| `bash` | Execute bash commands | No | Deny |
+| `read` | Read files | No | Deny |
+| `write` | Write files | No | Deny |
+| `edit` | String replacement in files | No | Deny |
+| `glob` | File pattern matching | No | Deny |
+| `grep` | Text search with regex | No | Deny |
+| `web_fetch` | Fetch URL content | No | Deny |
+| `web_search` | Search the web | Useful, to look up an error code or vendor article | Keep (Auto) |
+
+**Why trim them:** the agent's input comes from employees and is untrusted. With `bash` and `web_fetch` on Auto and networking Unrestricted, a malicious or pasted message could try to make the agent run commands or fetch arbitrary URLs. The help-desk job is text-only, so only `web_search` has a clear use. These recommendations are **not yet applied** in the Console.
 
 ## 3b. Environment
 
